@@ -28,4 +28,8 @@ export const directorySites: DirectorySite[] = [
     url: "https://www.rallyreview.net/",
     fallbackTitle: "Rally Review",
   },
+  {
+    url: "https://asl-rosters.vercel.app/?view=single&region=west&division=P1&a=San+Jose+Shockwave",
+    fallbackTitle: "ASL 2026 Roster Explorer",
+  },
 ];
