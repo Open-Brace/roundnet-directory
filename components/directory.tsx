@@ -177,6 +177,7 @@ export function Directory({ sections }: DirectoryProps) {
 
       <footer className="directory-footer">
         <Link href="/submit">Suggest a website</Link>
+        <Link href="/admin">Admin login</Link>
       </footer>
     </>
   );
