@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, desc, eq, inArray, max, sql } from "drizzle-orm";
+import { and, asc, eq, max } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -134,46 +134,57 @@ export async function updateSiteAction(id: number, formData: FormData) {
   adminRedirect("notice", "Changes saved.");
 }
 
-export async function moveSiteAction(id: number, direction: "up" | "down") {
+export async function reorderSitesAction(categoryId: number, orderedSiteIds: number[]) {
   await requireAdmin();
 
-  const [current] = await getDb()
-    .select()
-    .from(sites)
-    .where(and(eq(sites.id, id), eq(sites.status, "approved")))
-    .limit(1);
+  if (
+    !Number.isInteger(categoryId) ||
+    orderedSiteIds.length === 0 ||
+    orderedSiteIds.some((id) => !Number.isInteger(id)) ||
+    new Set(orderedSiteIds).size !== orderedSiteIds.length
+  ) {
+    return { ok: false as const, error: "Invalid site order." };
+  }
 
-  if (!current) adminRedirect("error", "Approved site not found.");
-  if (!current.categoryId) adminRedirect("error", "Site category not found.");
-
-  const candidates = await getDb()
-    .select()
+  const currentSites = await getDb()
+    .select({ id: sites.id })
     .from(sites)
     .where(
       and(
         eq(sites.status, "approved"),
-        eq(sites.categoryId, current.categoryId),
+        eq(sites.categoryId, categoryId),
       ),
-    )
-    .orderBy(direction === "up" ? desc(sites.position) : asc(sites.position));
+    );
 
-  const adjacent = candidates.find((candidate) =>
-    direction === "up"
-      ? candidate.position < current.position
-      : candidate.position > current.position,
+  const currentIds = new Set(currentSites.map((site) => site.id));
+  if (
+    currentIds.size !== orderedSiteIds.length ||
+    orderedSiteIds.some((id) => !currentIds.has(id))
+  ) {
+    return { ok: false as const, error: "The site list changed. Refresh and try again." };
+  }
+
+  const updatedAt = new Date();
+  const updates = orderedSiteIds.map((id, position) =>
+    getDb()
+      .update(sites)
+      .set({ position, updatedAt })
+      .where(
+        and(
+          eq(sites.id, id),
+          eq(sites.categoryId, categoryId),
+          eq(sites.status, "approved"),
+        ),
+      ),
   );
 
-  if (adjacent) {
-    await getDb()
-      .update(sites)
-      .set({
-        position: sql<number>`CASE WHEN ${sites.id} = ${current.id} THEN ${adjacent.position} ELSE ${current.position} END`,
-        updatedAt: new Date(),
-      })
-      .where(inArray(sites.id, [current.id, adjacent.id]));
+  try {
+    await getDb().batch([updates[0]!, ...updates.slice(1)]);
+  } catch {
+    return { ok: false as const, error: "Could not save the new order. Try again." };
   }
 
   revalidatePath("/");
   revalidatePath("/admin");
-  redirect("/admin");
+  return { ok: true as const };
 }
