@@ -430,6 +430,11 @@ input[type="search"]:focus-visible {
   color: #d93036;
 }
 
+.delete-button {
+  margin-left: auto;
+  color: #d93036;
+}
+
 .form-message {
   margin: -4px 0 0;
   font-size: 13px;

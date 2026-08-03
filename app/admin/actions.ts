@@ -134,6 +134,54 @@ export async function updateSiteAction(id: number, formData: FormData) {
   adminRedirect("notice", "Changes saved.");
 }
 
+export async function deleteSiteAction(id: number, _formData: FormData) {
+  await requireAdmin();
+
+  if (!Number.isInteger(id) || id < 1) adminRedirect("error", "Invalid site.");
+
+  const [existing] = await getDb()
+    .select()
+    .from(sites)
+    .where(eq(sites.id, id))
+    .limit(1);
+
+  if (!existing) adminRedirect("error", "Site not found.");
+
+  const remainingSites = existing.status === "approved" && existing.categoryId
+    ? await getDb()
+        .select({ id: sites.id })
+        .from(sites)
+        .where(
+          and(
+            eq(sites.status, "approved"),
+            eq(sites.categoryId, existing.categoryId),
+          ),
+        )
+        .orderBy(asc(sites.position), asc(sites.createdAt))
+    : [];
+
+  const updatedAt = new Date();
+  const reorderQueries = remainingSites
+    .filter((site) => site.id !== id)
+    .map((site, position) =>
+      getDb()
+        .update(sites)
+        .set({ position, updatedAt })
+        .where(eq(sites.id, site.id)),
+    );
+  const deleteQuery = getDb().delete(sites).where(eq(sites.id, id));
+
+  try {
+    await getDb().batch([deleteQuery, ...reorderQueries]);
+  } catch {
+    adminRedirect("error", "Could not delete that site. Try again.");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  adminRedirect("notice", `Deleted ${existing.title}.`);
+}
+
 export async function reorderSitesAction(categoryId: number, orderedSiteIds: number[]) {
   await requireAdmin();
 
