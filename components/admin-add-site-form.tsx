@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { addSiteAction } from "@/app/admin/actions";
 import type { Category } from "@/db/schema";
@@ -12,12 +12,54 @@ type AdminAddSiteFormProps = {
 
 export function AdminAddSiteForm({ categories }: AdminAddSiteFormProps) {
   const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+  const [titleEdited, setTitleEdited] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+
+  useEffect(() => {
+    if (!url.trim() || titleEdited) return;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setPreviewing(true);
+      try {
+        const response = await fetch(`/api/site-metadata?url=${encodeURIComponent(url)}`, {
+          signal: controller.signal,
+        });
+        const data = (await response.json()) as { title?: string };
+        if (response.ok && data.title) setTitle(data.title);
+      } catch {
+        // The title remains editable when a site cannot be previewed.
+      } finally {
+        if (!controller.signal.aborted) setPreviewing(false);
+      }
+    }, 650);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [titleEdited, url]);
 
   return (
     <form action={addSiteAction} className="add-site-form">
       <div className="form-field">
-        <label htmlFor="new-title">Title</label>
-        <input id="new-title" maxLength={120} name="title" required />
+        <div className="label-row">
+          <label htmlFor="new-title">Title</label>
+          {previewing ? <span>Finding site name…</span> : null}
+        </div>
+        <input
+          id="new-title"
+          maxLength={120}
+          name="title"
+          onChange={(event) => {
+            setTitle(event.target.value);
+            setTitleEdited(true);
+          }}
+          placeholder="Site name"
+          required
+          value={title}
+        />
       </div>
       <div className="form-field">
         <div className="label-row">
@@ -25,7 +67,10 @@ export function AdminAddSiteForm({ categories }: AdminAddSiteFormProps) {
           <button
             className="inline-action"
             disabled={!url.trim()}
-            onClick={() => setUrl(getBaseUrl(url))}
+            onClick={() => {
+              setUrl(getBaseUrl(url));
+              setTitleEdited(false);
+            }}
             title="Remove the path, query, and fragment"
             type="button"
           >
@@ -35,7 +80,10 @@ export function AdminAddSiteForm({ categories }: AdminAddSiteFormProps) {
         <input
           id="new-url"
           name="url"
-          onChange={(event) => setUrl(event.target.value)}
+          onChange={(event) => {
+            setUrl(event.target.value);
+            setTitleEdited(false);
+          }}
           placeholder="https://example.com"
           required
           type="url"
