@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/admin/actions";
 import { AdminAddSiteForm } from "@/components/admin-add-site-form";
 import { AdminSiteForm } from "@/components/admin-site-form";
+import { AdminSortableSiteList } from "@/components/admin-sortable-site-list";
 import { getAllSites, getCategories } from "@/db/queries";
 import { isAdmin } from "@/lib/admin-auth";
 
@@ -85,18 +86,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                   <h3>{category.name}</h3>
                   <span>{categorySites.length}</span>
                 </div>
-                <ul className="admin-site-list">
-                  {categorySites.map((site, index) => (
-                    <AdminSiteForm
-                      categories={categories}
-                      index={index}
-                      isFirst={index === 0}
-                      isLast={index === categorySites.length - 1}
-                      key={site.id}
-                      site={site}
-                    />
-                  ))}
-                </ul>
+                <AdminSortableSiteList
+                  categories={categories}
+                  categoryId={category.id}
+                  sites={categorySites}
+                />
               </section>
             );
           })}

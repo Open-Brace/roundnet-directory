@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import type { ResolvedSite } from "@/lib/site-metadata";
 
@@ -21,6 +21,29 @@ export type DirectorySection = {
 export function Directory({ sections }: DirectoryProps) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [reservedResultsHeight, setReservedResultsHeight] = useState<number | null>(null);
+  const pendingScrollPosition = useRef<number | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (pendingScrollPosition.current === null) return;
+    window.scrollTo(0, pendingScrollPosition.current);
+    pendingScrollPosition.current = null;
+  }, [activeCategory]);
+
+  function selectCategory(category: string) {
+    if (category === activeCategory) return;
+
+    pendingScrollPosition.current = window.scrollY;
+    if (category === "all") {
+      setReservedResultsHeight(null);
+    } else {
+      setReservedResultsHeight((current) =>
+        Math.max(current ?? 0, resultsRef.current?.offsetHeight ?? 0),
+      );
+    }
+    setActiveCategory(category);
+  }
 
   const filteredSections = useMemo(() => {
     const searchTerm = query.trim().toLocaleLowerCase();
@@ -78,7 +101,7 @@ export function Directory({ sections }: DirectoryProps) {
       <nav aria-label="Directory categories" className="category-nav">
         <button
           aria-pressed={activeCategory === "all"}
-          onClick={() => setActiveCategory("all")}
+          onClick={() => selectCategory("all")}
           type="button"
         >
           All
@@ -88,7 +111,7 @@ export function Directory({ sections }: DirectoryProps) {
             aria-label={section.name}
             aria-pressed={activeCategory === section.slug}
             key={section.id}
-            onClick={() => setActiveCategory(section.slug)}
+            onClick={() => selectCategory(section.slug)}
             type="button"
           >
             {section.shortName}
@@ -100,8 +123,13 @@ export function Directory({ sections }: DirectoryProps) {
         {resultCount} {resultCount === 1 ? "link" : "links"}
       </p>
 
-      {resultCount > 0 ? (
-        <div className="directory-sections">
+      <div
+        className="directory-results"
+        ref={resultsRef}
+        style={reservedResultsHeight ? { minHeight: reservedResultsHeight } : undefined}
+      >
+        {resultCount > 0 ? (
+          <div className="directory-sections">
           {filteredSections.map((section) => (
             <section className="directory-section" key={section.id}>
               <div className="directory-section-heading">
@@ -141,10 +169,11 @@ export function Directory({ sections }: DirectoryProps) {
               </ul>
             </section>
           ))}
-        </div>
-      ) : (
-        <p className="empty-state">No links match “{query.trim()}”.</p>
-      )}
+          </div>
+        ) : (
+          <p className="empty-state">No links match “{query.trim()}”.</p>
+        )}
+      </div>
 
       <footer className="directory-footer">
         <Link href="/submit">Suggest a website</Link>
