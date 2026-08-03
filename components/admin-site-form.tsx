@@ -2,7 +2,7 @@
 
 import { useId, useState, type ComponentPropsWithRef, type CSSProperties } from "react";
 
-import { updateSiteAction } from "@/app/admin/actions";
+import { deleteSiteAction, updateSiteAction } from "@/app/admin/actions";
 import type { Category, Site } from "@/db/schema";
 import { getBaseUrl } from "@/lib/base-url";
 
@@ -48,6 +48,7 @@ export function AdminSiteForm({
   setNodeRef,
 }: AdminSiteFormProps) {
   const updateAction = updateSiteAction.bind(null, site.id);
+  const deleteAction = deleteSiteAction.bind(null, site.id);
   const [expanded, setExpanded] = useState(false);
   const [url, setUrl] = useState(site.url);
   const panelId = useId();
@@ -188,6 +189,20 @@ export function AdminSiteForm({
                 </button>
               </>
             ) : null}
+            <button
+              className="text-button danger-button delete-button"
+              formAction={deleteAction}
+              formNoValidate
+              onClick={(event) => {
+                const confirmed = window.confirm(
+                  `Delete “${site.title}”? This can’t be undone.`,
+                );
+                if (!confirmed) event.preventDefault();
+              }}
+              type="submit"
+            >
+              Delete
+            </button>
           </div>
         </form>
       ) : null}
