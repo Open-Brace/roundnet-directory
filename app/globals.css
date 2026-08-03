@@ -260,6 +260,10 @@ input[type="search"]:focus-visible {
 }
 
 .directory-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
   margin-top: 24px;
   font-size: 13px;
 }
@@ -275,6 +279,12 @@ input[type="search"]:focus-visible {
 .back-nav a:hover,
 .header-actions a:hover {
   color: var(--foreground);
+}
+
+.directory-footer a:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 
 .narrow-page {
