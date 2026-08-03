@@ -2,7 +2,7 @@ import { lookup } from "node:dns/promises";
 
 import { isBlockedAddress, normalizeSiteUrl } from "@/lib/site-url";
 
-const MAX_HTML_BYTES = 512_000;
+const MAX_HEAD_BYTES = 512_000;
 const MAX_REDIRECTS = 3;
 const REQUEST_TIMEOUT_MS = 8_000;
 
@@ -51,36 +51,26 @@ async function assertPublicUrl(value: string) {
 }
 
 async function readLimitedHtml(response: Response) {
-  const declaredLength = Number(response.headers.get("content-length") ?? 0);
-  if (declaredLength > MAX_HTML_BYTES) {
-    throw new Error("That page is too large to preview.");
-  }
-
   if (!response.body) return "";
 
   const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
+  const decoder = new TextDecoder();
+  let html = "";
   let total = 0;
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.byteLength;
-    if (total > MAX_HTML_BYTES) {
+    html += decoder.decode(value, { stream: true });
+
+    if (/<\/head\s*>/i.test(html) || total >= MAX_HEAD_BYTES) {
       await reader.cancel();
-      throw new Error("That page is too large to preview.");
+      break;
     }
-    chunks.push(value);
   }
 
-  const bytes = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-
-  return new TextDecoder().decode(bytes);
+  return html + decoder.decode();
 }
 
 export async function fetchProposedTitle(value: string) {
