@@ -5,22 +5,6 @@ export type DirectorySite = {
 
 export const directorySites: DirectorySite[] = [
   {
-    url: "https://spikewiki.com/",
-    fallbackTitle: "Spike Wiki",
-  },
-  {
-    url: "https://courtform.lovable.app/",
-    fallbackTitle: "Courtform",
-  },
-  {
-    url: "https://irf-worlds-roster-explorer.vercel.app/",
-    fallbackTitle: "Worlds 2026 Roster Explorer",
-  },
-  {
-    url: "https://www.cutserve.app/",
-    fallbackTitle: "CutServe",
-  },
-  {
     url: "https://fwango.io/",
     fallbackTitle: "Fwango",
   },
@@ -31,5 +15,21 @@ export const directorySites: DirectorySite[] = [
   {
     url: "https://asl-rosters.vercel.app/",
     fallbackTitle: "ASL 2026 Roster Explorer",
+  },
+  {
+    url: "https://irf-worlds-roster-explorer.vercel.app/",
+    fallbackTitle: "Worlds 2026 Roster Explorer",
+  },
+  {
+    url: "https://courtform.lovable.app/",
+    fallbackTitle: "Courtform",
+  },
+  {
+    url: "https://www.cutserve.app/",
+    fallbackTitle: "CutServe",
+  },
+  {
+    url: "https://spikewiki.com/",
+    fallbackTitle: "Spike Wiki",
   },
 ];
