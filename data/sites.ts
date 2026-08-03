@@ -5,7 +5,7 @@ export type DirectorySite = {
 
 export const directorySites: DirectorySite[] = [
   {
-    url: "https://spikewiki.com/wiki/Main_Page",
+    url: "https://spikewiki.com/",
     fallbackTitle: "Spike Wiki",
   },
   {
@@ -29,11 +29,7 @@ export const directorySites: DirectorySite[] = [
     fallbackTitle: "Rally Review",
   },
   {
-    url: "https://asl-rosters.vercel.app/standings",
-    fallbackTitle: "Division Standings · ASL 2026",
-  },
-  {
-    url: "https://asl-rosters.vercel.app/?view=single&region=west&division=P1&a=San+Jose+Shockwave",
+    url: "https://asl-rosters.vercel.app/",
     fallbackTitle: "ASL 2026 Roster Explorer",
   },
 ];
