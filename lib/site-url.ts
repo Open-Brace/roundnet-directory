@@ -13,7 +13,7 @@ export function normalizeSiteUrl(value: string) {
     throw new Error("Website addresses cannot include credentials.");
   }
 
-  return new URL("/", parsed.origin).toString();
+  return parsed.origin;
 }
 
 function isBlockedIpv4(address: string) {

@@ -9,6 +9,18 @@ const initialSubmissionState: SubmissionState = {
   message: "",
 };
 
+function getBaseUrl(value: string) {
+  const input = value.trim();
+  if (!input) return "";
+
+  try {
+    const url = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`);
+    return url.origin;
+  } catch {
+    return value;
+  }
+}
+
 export function SubmissionForm() {
   const [state, action, pending] = useActionState(submitSite, initialSubmissionState);
   const [url, setUrl] = useState("");
@@ -53,7 +65,21 @@ export function SubmissionForm() {
   return (
     <form action={action} className="stacked-form" ref={formRef}>
       <div className="form-field">
-        <label htmlFor="suggestion-url">Website URL</label>
+        <div className="label-row">
+          <label htmlFor="suggestion-url">Website URL</label>
+          <button
+            className="inline-action"
+            disabled={!url.trim()}
+            onClick={() => {
+              setUrl(getBaseUrl(url));
+              setTitleEdited(false);
+            }}
+            title="Remove the path, query, and fragment"
+            type="button"
+          >
+            Use base URL
+          </button>
+        </div>
         <input
           autoComplete="url"
           id="suggestion-url"
@@ -87,7 +113,6 @@ export function SubmissionForm() {
           type="text"
           value={title}
         />
-        <p className="field-hint">We’ll suggest a name from the site. You can change it.</p>
       </div>
 
       <div aria-hidden="true" className="honeypot">
