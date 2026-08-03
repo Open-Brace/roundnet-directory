@@ -3,23 +3,12 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { submitSite, type SubmissionState } from "@/app/submit/actions";
+import { getBaseUrl } from "@/lib/base-url";
 
 const initialSubmissionState: SubmissionState = {
   status: "idle",
   message: "",
 };
-
-function getBaseUrl(value: string) {
-  const input = value.trim();
-  if (!input) return "";
-
-  try {
-    const url = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`);
-    return url.origin;
-  } catch {
-    return value;
-  }
-}
 
 export function SubmissionForm() {
   const [state, action, pending] = useActionState(submitSite, initialSubmissionState);
