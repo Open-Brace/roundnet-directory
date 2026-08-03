@@ -243,15 +243,27 @@ input[type="search"]:focus-visible {
   gap: 16px;
 }
 
-.label-row span,
-.field-hint {
+.label-row span {
   color: var(--tertiary);
   font-size: 12px;
 }
 
-.field-hint {
-  margin: 0;
-  line-height: 1.5;
+.inline-action {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--secondary);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.inline-action:hover:not(:disabled) {
+  color: var(--foreground);
+}
+
+.inline-action:disabled {
+  cursor: default;
+  opacity: 0.45;
 }
 
 .form-field input,

@@ -5,31 +5,31 @@ export type DirectorySite = {
 
 export const directorySites: DirectorySite[] = [
   {
-    url: "https://fwango.io/",
+    url: "https://fwango.io",
     fallbackTitle: "Fwango",
   },
   {
-    url: "https://www.rallyreview.net/",
+    url: "https://www.rallyreview.net",
     fallbackTitle: "Rally Review",
   },
   {
-    url: "https://asl-rosters.vercel.app/",
+    url: "https://asl-rosters.vercel.app",
     fallbackTitle: "ASL 2026 Roster Explorer",
   },
   {
-    url: "https://irf-worlds-roster-explorer.vercel.app/",
+    url: "https://irf-worlds-roster-explorer.vercel.app",
     fallbackTitle: "Worlds 2026 Roster Explorer",
   },
   {
-    url: "https://courtform.lovable.app/",
+    url: "https://courtform.lovable.app",
     fallbackTitle: "Courtform",
   },
   {
-    url: "https://www.cutserve.app/",
+    url: "https://www.cutserve.app",
     fallbackTitle: "CutServe",
   },
   {
-    url: "https://spikewiki.com/",
+    url: "https://spikewiki.com",
     fallbackTitle: "Spike Wiki",
   },
 ];
