@@ -14,13 +14,12 @@ export function normalizeSiteUrl(value: string) {
   }
 
   parsed.hash = "";
-  parsed.search = "";
 
   const pathname = parsed.pathname === "/"
     ? ""
     : parsed.pathname.replace(/\/+$/, "");
 
-  return `${parsed.origin}${pathname}`;
+  return `${parsed.origin}${pathname}${parsed.search}`;
 }
 
 function isBlockedIpv4(address: string) {
