@@ -11,11 +11,6 @@ export type SubmissionState = {
   message: string;
 };
 
-export const initialSubmissionState: SubmissionState = {
-  status: "idle",
-  message: "",
-};
-
 export async function submitSite(
   _previousState: SubmissionState,
   formData: FormData,

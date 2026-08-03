@@ -2,10 +2,12 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import {
-  initialSubmissionState,
-  submitSite,
-} from "@/app/submit/actions";
+import { submitSite, type SubmissionState } from "@/app/submit/actions";
+
+const initialSubmissionState: SubmissionState = {
+  status: "idle",
+  message: "",
+};
 
 export function SubmissionForm() {
   const [state, action, pending] = useActionState(submitSite, initialSubmissionState);
