@@ -109,6 +109,73 @@ input[type="search"]:focus-visible {
   line-height: 1.4;
 }
 
+.category-nav {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0 0 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.category-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.category-nav button {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--secondary);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.category-nav button:hover {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+}
+
+.category-nav button[aria-pressed="true"] {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.category-nav button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.directory-sections {
+  display: grid;
+  gap: 32px;
+}
+
+.directory-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.directory-section-heading h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.directory-section-heading span {
+  color: var(--tertiary);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+}
+
 .site-list {
   margin: 0;
   padding: 0;
@@ -445,7 +512,7 @@ input[type="search"]:focus-visible {
 
 .add-site-form {
   display: grid;
-  grid-template-columns: minmax(150px, 0.8fr) minmax(240px, 1.4fr) 120px auto;
+  grid-template-columns: minmax(140px, 0.8fr) minmax(210px, 1.3fr) minmax(140px, 0.8fr) 110px auto;
   align-items: end;
   gap: 12px;
   padding: 16px;
@@ -500,8 +567,33 @@ input[type="search"]:focus-visible {
 
 .admin-fields {
   display: grid;
-  grid-template-columns: minmax(160px, 0.8fr) minmax(240px, 1.4fr) 120px;
+  grid-template-columns: minmax(140px, 0.7fr) minmax(200px, 1.2fr) minmax(140px, 0.8fr) 110px;
   gap: 12px;
+}
+
+.published-categories {
+  display: grid;
+  gap: 34px;
+}
+
+.published-category-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.published-category-heading h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.published-category-heading span {
+  color: var(--tertiary);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
 }
 
 .admin-card-actions {
