@@ -12,30 +12,6 @@ export type ResolvedSite = {
 
 const fallbackFavicon = "/favicon-fallback.svg";
 
-function decodeHtml(value: string) {
-  const namedEntities: Record<string, string> = {
-    amp: "&",
-    apos: "'",
-    gt: ">",
-    lt: "<",
-    nbsp: " ",
-    quot: '"',
-  };
-
-  return value
-    .replace(/&#(\d+);/g, (_, code: string) =>
-      String.fromCodePoint(Number.parseInt(code, 10)),
-    )
-    .replace(/&#x([\da-f]+);/gi, (_, code: string) =>
-      String.fromCodePoint(Number.parseInt(code, 16)),
-    )
-    .replace(/&([a-z]+);/gi, (entity, name: string) =>
-      namedEntities[name.toLowerCase()] ?? entity,
-    )
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function getAttribute(tag: string, name: string) {
   const match = tag.match(
     new RegExp(`${name}\\s*=\\s*(?:["']([^"']*)["']|([^\\s>]+))`, "i"),
@@ -109,14 +85,12 @@ export async function resolveSite(site: DirectorySite): Promise<ResolvedSite> {
     if (!response.ok) throw new Error(`Site returned ${response.status}`);
 
     const html = await response.text();
-    const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
-    const title = titleMatch ? decodeHtml(titleMatch[1]) : site.fallbackTitle;
     const metadataUrl = response.url || site.url;
     const faviconUrl = findFavicon(html, metadataUrl);
 
     return {
       url: site.url,
-      title: title || site.fallbackTitle,
+      title: site.fallbackTitle,
       hostname: fallbackUrl.hostname.replace(/^www\./, ""),
       favicon: await fetchFaviconAsDataUrl(faviconUrl),
     };

@@ -1,11 +1,16 @@
 import { Directory } from "@/components/directory";
-import { directorySites } from "@/data/sites";
+import { getApprovedSites } from "@/db/queries";
 import { resolveSite } from "@/lib/site-metadata";
 
-export const revalidate = 86_400;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const sites = await Promise.all(directorySites.map(resolveSite));
+  const directorySites = await getApprovedSites();
+  const resolvedSites = await Promise.all(
+    directorySites.map((site) =>
+      resolveSite({ url: site.url, fallbackTitle: site.title }),
+    ),
+  );
 
   return (
     <main>
@@ -13,7 +18,7 @@ export default async function Home() {
         <h1>Roundnet Directory</h1>
         <p>Useful tools and websites for roundnet.</p>
       </header>
-      <Directory sites={sites} />
+      <Directory sites={resolvedSites} />
     </main>
   );
 }
