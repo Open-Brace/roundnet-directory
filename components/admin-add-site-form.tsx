@@ -3,9 +3,14 @@
 import { useState } from "react";
 
 import { addSiteAction } from "@/app/admin/actions";
+import type { Category } from "@/db/schema";
 import { getBaseUrl } from "@/lib/base-url";
 
-export function AdminAddSiteForm() {
+type AdminAddSiteFormProps = {
+  categories: Category[];
+};
+
+export function AdminAddSiteForm({ categories }: AdminAddSiteFormProps) {
   const [url, setUrl] = useState("");
 
   return (
@@ -36,6 +41,14 @@ export function AdminAddSiteForm() {
           type="url"
           value={url}
         />
+      </div>
+      <div className="form-field category-field">
+        <label htmlFor="new-category">Category</label>
+        <select id="new-category" name="categoryId" required>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
+        </select>
       </div>
       <div className="form-field status-field">
         <label htmlFor="new-status">Status</label>

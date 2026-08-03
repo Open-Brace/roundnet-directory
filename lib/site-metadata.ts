@@ -1,5 +1,3 @@
-import type { DirectorySite } from "@/data/sites";
-
 const MAX_ICON_BYTES = 256_000;
 const REQUEST_TIMEOUT_MS = 8_000;
 
@@ -8,6 +6,11 @@ export type ResolvedSite = {
   title: string;
   hostname: string;
   favicon: string;
+};
+
+type DirectorySite = {
+  url: string;
+  fallbackTitle: string;
 };
 
 const fallbackFavicon = "/favicon-fallback.svg";

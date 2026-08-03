@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { submitSite, type SubmissionState } from "@/app/submit/actions";
+import type { Category } from "@/db/schema";
 import { getBaseUrl } from "@/lib/base-url";
 
 const initialSubmissionState: SubmissionState = {
@@ -10,7 +11,11 @@ const initialSubmissionState: SubmissionState = {
   message: "",
 };
 
-export function SubmissionForm() {
+type SubmissionFormProps = {
+  categories: Category[];
+};
+
+export function SubmissionForm({ categories }: SubmissionFormProps) {
   const [state, action, pending] = useActionState(submitSite, initialSubmissionState);
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
@@ -102,6 +107,16 @@ export function SubmissionForm() {
           type="text"
           value={title}
         />
+      </div>
+
+      <div className="form-field">
+        <label htmlFor="suggestion-category">Category</label>
+        <select id="suggestion-category" name="categoryId" required>
+          <option disabled value="">Choose a category</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
+        </select>
       </div>
 
       <div aria-hidden="true" className="honeypot">

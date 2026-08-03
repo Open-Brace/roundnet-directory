@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { getDb } from "@/db";
-import { sites } from "@/db/schema";
+import { categories, sites } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { normalizeSiteUrl } from "@/lib/site-url";
 
 export type SubmissionState = {
@@ -21,9 +22,24 @@ export async function submitSite(
 
   const rawUrl = String(formData.get("url") ?? "");
   const title = String(formData.get("title") ?? "").trim().slice(0, 120);
+  const categoryId = Number(formData.get("categoryId"));
 
   if (!title) {
     return { status: "error", message: "Add a proposed site name." };
+  }
+
+  if (!Number.isInteger(categoryId) || categoryId < 1) {
+    return { status: "error", message: "Choose a category." };
+  }
+
+  const [category] = await getDb()
+    .select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.id, categoryId))
+    .limit(1);
+
+  if (!category) {
+    return { status: "error", message: "Choose a valid category." };
   }
 
   let url: string;
@@ -38,7 +54,7 @@ export async function submitSite(
 
   const inserted = await getDb()
     .insert(sites)
-    .values({ title, url, status: "pending", position: 0 })
+    .values({ categoryId, title, url, status: "pending", position: 0 })
     .onConflictDoNothing({ target: sites.url })
     .returning({ id: sites.id });
 

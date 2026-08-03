@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getDb } from "@/db";
-import { sites, type Site } from "@/db/schema";
+import { categories, sites, type Site } from "@/db/schema";
 import { clearAdminSession, isAdmin } from "@/lib/admin-auth";
 import { normalizeSiteUrl } from "@/lib/site-url";
 
@@ -22,11 +22,32 @@ function parseStatus(value: FormDataEntryValue | null): Site["status"] {
   return "pending";
 }
 
-async function getNextPosition() {
+async function requireCategory(value: FormDataEntryValue | null) {
+  const categoryId = Number(value);
+  if (!Number.isInteger(categoryId) || categoryId < 1) {
+    adminRedirect("error", "Choose a category.");
+  }
+
+  const [category] = await getDb()
+    .select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.id, categoryId))
+    .limit(1);
+
+  if (!category) adminRedirect("error", "Choose a valid category.");
+  return category.id;
+}
+
+async function getNextPosition(categoryId: number) {
   const [result] = await getDb()
     .select({ position: max(sites.position) })
     .from(sites)
-    .where(eq(sites.status, "approved"));
+    .where(
+      and(
+        eq(sites.status, "approved"),
+        eq(sites.categoryId, categoryId),
+      ),
+    );
 
   return (result?.position ?? -1) + 1;
 }
@@ -41,6 +62,7 @@ export async function addSiteAction(formData: FormData) {
 
   const title = String(formData.get("title") ?? "").trim().slice(0, 120);
   const status = parseStatus(formData.get("statusOverride") ?? formData.get("status"));
+  const categoryId = await requireCategory(formData.get("categoryId"));
   if (!title) adminRedirect("error", "A title is required.");
 
   let url: string;
@@ -56,8 +78,9 @@ export async function addSiteAction(formData: FormData) {
       .values({
         title,
         url,
+        categoryId,
         status,
-        position: status === "approved" ? await getNextPosition() : 0,
+        position: status === "approved" ? await getNextPosition(categoryId) : 0,
       });
   } catch {
     adminRedirect("error", "That URL already exists.");
@@ -76,6 +99,7 @@ export async function updateSiteAction(id: number, formData: FormData) {
 
   const title = String(formData.get("title") ?? "").trim().slice(0, 120);
   const status = parseStatus(formData.get("statusOverride") ?? formData.get("status"));
+  const categoryId = await requireCategory(formData.get("categoryId"));
   if (!title) adminRedirect("error", "A title is required.");
 
   let url: string;
@@ -91,10 +115,12 @@ export async function updateSiteAction(id: number, formData: FormData) {
       .set({
         title,
         url,
+        categoryId,
         status,
         position:
-          status === "approved" && existing.status !== "approved"
-            ? await getNextPosition()
+          status === "approved" &&
+          (existing.status !== "approved" || existing.categoryId !== categoryId)
+            ? await getNextPosition(categoryId)
             : existing.position,
         updatedAt: new Date(),
       })
@@ -118,11 +144,17 @@ export async function moveSiteAction(id: number, direction: "up" | "down") {
     .limit(1);
 
   if (!current) adminRedirect("error", "Approved site not found.");
+  if (!current.categoryId) adminRedirect("error", "Site category not found.");
 
   const candidates = await getDb()
     .select()
     .from(sites)
-    .where(eq(sites.status, "approved"))
+    .where(
+      and(
+        eq(sites.status, "approved"),
+        eq(sites.categoryId, current.categoryId),
+      ),
+    )
     .orderBy(direction === "up" ? desc(sites.position) : asc(sites.position));
 
   const adjacent = candidates.find((candidate) =>

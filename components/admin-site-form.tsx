@@ -1,4 +1,9 @@
-import type { Site } from "@/db/schema";
+"use client";
+
+import { useState } from "react";
+
+import type { Category, Site } from "@/db/schema";
+import { getBaseUrl } from "@/lib/base-url";
 
 import {
   moveSiteAction,
@@ -6,14 +11,16 @@ import {
 } from "@/app/admin/actions";
 
 type AdminSiteFormProps = {
+  categories: Category[];
   index?: number;
   isFirst?: boolean;
   isLast?: boolean;
   site: Site;
 };
 
-export function AdminSiteForm({ index, isFirst, isLast, site }: AdminSiteFormProps) {
+export function AdminSiteForm({ categories, index, isFirst, isLast, site }: AdminSiteFormProps) {
   const updateAction = updateSiteAction.bind(null, site.id);
+  const [url, setUrl] = useState(site.url);
 
   return (
     <li className="admin-site-card">
@@ -56,8 +63,39 @@ export function AdminSiteForm({ index, isFirst, isLast, site }: AdminSiteFormPro
             />
           </div>
           <div className="form-field">
-            <label htmlFor={`url-${site.id}`}>URL</label>
-            <input defaultValue={site.url} id={`url-${site.id}`} name="url" required type="url" />
+            <div className="label-row">
+              <label htmlFor={`url-${site.id}`}>URL</label>
+              <button
+                className="inline-action"
+                onClick={() => setUrl(getBaseUrl(url))}
+                title="Remove the path, query, and fragment"
+                type="button"
+              >
+                Use base URL
+              </button>
+            </div>
+            <input
+              id={`url-${site.id}`}
+              name="url"
+              onChange={(event) => setUrl(event.target.value)}
+              required
+              type="url"
+              value={url}
+            />
+          </div>
+          <div className="form-field category-field">
+            <label htmlFor={`category-${site.id}`}>Category</label>
+            <select
+              defaultValue={site.categoryId ?? ""}
+              id={`category-${site.id}`}
+              name="categoryId"
+              required
+            >
+              <option disabled value="">Choose</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form-field status-field">
             <label htmlFor={`status-${site.id}`}>Status</label>
