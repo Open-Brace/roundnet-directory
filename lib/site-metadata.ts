@@ -111,13 +111,13 @@ export async function resolveSite(site: DirectorySite): Promise<ResolvedSite> {
     const html = await response.text();
     const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
     const title = titleMatch ? decodeHtml(titleMatch[1]) : site.fallbackTitle;
-    const resolvedUrl = response.url || site.url;
-    const faviconUrl = findFavicon(html, resolvedUrl);
+    const metadataUrl = response.url || site.url;
+    const faviconUrl = findFavicon(html, metadataUrl);
 
     return {
-      url: resolvedUrl,
+      url: site.url,
       title: title || site.fallbackTitle,
-      hostname: new URL(resolvedUrl).hostname.replace(/^www\./, ""),
+      hostname: fallbackUrl.hostname.replace(/^www\./, ""),
       favicon: await fetchFaviconAsDataUrl(faviconUrl),
     };
   } catch {
