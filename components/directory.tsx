@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type { ResolvedSite } from "@/lib/site-metadata";
@@ -90,6 +91,10 @@ export function Directory({ sites }: DirectoryProps) {
       ) : (
         <p className="empty-state">No links match “{query.trim()}”.</p>
       )}
+
+      <footer className="directory-footer">
+        <Link href="/submit">Suggest a website</Link>
+      </footer>
     </>
   );
 }
